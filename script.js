@@ -4,7 +4,7 @@ async function searchEmployee() {
     const result = document.getElementById("result");
 
     if (name === "") {
-        result.innerHTML = "Please enter an employee name.";
+        result.innerHTML = "Please enter an employee name to search.";
         return;
     }
 
