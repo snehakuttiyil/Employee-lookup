@@ -1,48 +1,83 @@
-async function searchEmployee() {
+// DOM Reference Elements
+const searchInput = document.getElementById("searchInput");
+const searchBtn = document.getElementById("searchBtn");
+const employeeList = document.getElementById("employeeList");
+const statusMessage = document.getElementById("statusMessage");
 
-    const name = document.getElementById("employeeName").value.trim();
-    const result = document.getElementById("result");
+let debounceTimer;
 
-    if (name === "") {
-        result.innerHTML = "Please enter an employee name to search.";
-        return;
+// Fetch Employees from DummyJSON API
+async function fetchEmployees(name = "") {
+  showStatus("Loading employees...");
+
+  try {
+    // API URL using encodeURIComponent as requested
+    const url = `https://dummyjson.com/users/search?q=${encodeURIComponent(name)}`;
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      throw new Error(`Server returned status ${response.status}`);
     }
 
-    result.innerHTML = "Searching...";
-
-    try {
-
-        const url = `https://dummyjson.com/users/search?q=${encodeURIComponent(name)}`;
-
-        const response = await fetch(url);
-
-        if (!response.ok) {
-            throw new Error("Failed to fetch employee data");
-        }
-
-        const data = await response.json();
-
-        if (data.users.length === 0) {
-            result.innerHTML = "Employee not found.";
-            return;
-        }
-
-        const employee = data.users[0];
-
-        result.innerHTML = `
-            <h2>${employee.firstName} ${employee.lastName}</h2>
-            <p><strong>ID:</strong> ${employee.id}</p>
-            <p><strong>Email:</strong> ${employee.email}</p>
-            <p><strong>Phone:</strong> ${employee.phone}</p>
-            <p><strong>Age:</strong> ${employee.age}</p>
-            <p><strong>Department:</strong> ${employee.company.department}</p>
-            <p><strong>Job Title:</strong> ${employee.company.title}</p>
-        `;
-
-    } catch (error) {
-
-        result.innerHTML = "Error: Unable to get employee data.";
-        console.error(error);
-
-    }
+    const data = await response.json();
+    renderEmployees(data.users);
+  } catch (error) {
+    console.error("Fetch Error:", error);
+    showStatus("Failed to load employees. Please try again.", true);
+  }
 }
+
+// Render Results to DOM
+function renderEmployees(users) {
+  employeeList.innerHTML = "";
+
+  if (!users || users.length === 0) {
+    showStatus("No matching employees found.");
+    return;
+  }
+
+  showStatus(`Found ${users.length} employee(s).`);
+
+  users.forEach(user => {
+    const card = document.createElement("div");
+    card.className = "employee-card";
+
+    // Extract relevant job & company details provided by DummyJSON
+    const jobTitle = user.company?.title || "Employee";
+    const department = user.company?.department || "General";
+    const companyName = user.company?.name || "Company";
+
+    card.innerHTML = `
+      <img src="${user.image}" alt="${user.firstName} ${user.lastName}">
+      <div class="employee-info">
+        <h3>${user.firstName} ${user.lastName}</h3>
+        <p class="company-title">${jobTitle} — ${department} (${companyName})</p>
+        <p><strong>Email:</strong> ${user.email} | <strong>Phone:</strong> ${user.phone}</p>
+      </div>
+    `;
+
+    employeeList.appendChild(card);
+  });
+}
+
+// Display Loading/Error Status
+function showStatus(text, isError = false) {
+  statusMessage.textContent = text;
+  statusMessage.style.color = isError ? "#e74c3c" : "#7f8c8d";
+}
+
+// Debounce input to avoid spamming the API on every keypress
+searchInput.addEventListener("input", () => {
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => {
+    fetchEmployees(searchInput.value);
+  }, 300); // 300ms delay
+});
+
+// Manual Search Button Trigger
+searchBtn.addEventListener("click", () => {
+  fetchEmployees(searchInput.value);
+});
+
+// Initial Fetch on Page Load
+fetchEmployees();
