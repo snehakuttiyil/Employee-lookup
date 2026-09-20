@@ -1,29 +1,29 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Employee Lookup</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Employee Lookup Directory</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-    <div class="container">
+  <div class="container">
+    <h1>Employee Lookup Directory</h1>
 
-        <h1>Employee Lookup</h1>
-
-        <input
-            type="text"
-            id="employeeName"
-            placeholder="Enter employee name"
-        >
-
-        <button onclick="searchEmployee()">Search</button>
-
-        <div id="result"></div>
-
+    <!-- Search Controls -->
+    <div class="controls">
+      <input type="text" id="searchInput" placeholder="Search employee name (e.g., Emily, Michael)...">
+      <button id="searchBtn">Search</button>
     </div>
 
-    <script src="script.js"></script>
+    <!-- Status Message (Loading / Errors) -->
+    <div id="statusMessage" class="status-message"></div>
 
+    <!-- Employee List Container -->
+    <div id="employeeList" class="employee-list"></div>
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>
